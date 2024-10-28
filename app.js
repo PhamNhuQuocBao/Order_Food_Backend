@@ -1,10 +1,11 @@
 // app.js
-import { Restaurant } from "./models/retaurant.model.js";
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
+import { Restaurant } from "./models/retaurant.model.js";
 import { User } from "./models/user.model.js";
+import { Menu } from "./models/menu.model.js";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -61,7 +62,6 @@ app.get("/restaurants-owner/:id", async (req, res) => {
   try {
     const id = req.params.id;
     const restaurant = await Restaurant.find({ ownerId: id });
-    console.log(restaurant);
 
     if (restaurant.length === 0) {
       return res
@@ -114,6 +114,72 @@ app.delete("/restaurants/:id", async (req, res) => {
     const restaurant = await Restaurant.findByIdAndDelete(id);
 
     res.status(200).json(restaurant);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// =====================MENU========================
+app.get("/menus", async (req, res) => {
+  try {
+    const menu = await Menu.find();
+
+    res.status(200).json(menu);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.get("/restaurant-menus/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const menu = await Menu.find({ restaurantId: id });
+
+    res.status(200).json(menu);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.get("/menus/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const menu = await Menu.findById(id);
+
+    res.status(200).json(menu);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.post("/menus", async (req, res) => {
+  try {
+    const menuModel = new Menu(req.body);
+    const menu = await menuModel.save();
+
+    res.status(200).json(menu);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.put("/menus/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const menu = await Menu.findByIdAndUpdate(id, req.body);
+
+    res.status(200).json(menu);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.delete("/menus/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const menu = await Menu.findByIdAndDelete(id);
+
+    res.status(200).json(menu);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
