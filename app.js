@@ -57,6 +57,24 @@ app.get("/restaurants", async (req, res) => {
   }
 });
 
+app.get("/restaurants-owner/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const restaurant = await Restaurant.find({ ownerId: id });
+    console.log(restaurant);
+
+    if (restaurant.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No restaurants found for the given ownerId." });
+    }
+
+    res.status(200).json(restaurant);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 app.get("/restaurants/:id", async (req, res) => {
   try {
     const id = req.params.id;

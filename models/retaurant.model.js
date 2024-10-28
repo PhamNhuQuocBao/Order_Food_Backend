@@ -19,6 +19,10 @@ const restaurantSchema = new mongoose.Schema({
       type: String,
     },
   },
+  ownerId: {
+    type: String,
+    required: true,
+  },
 });
 
 export const Restaurant = mongoose.model("Restaurant", restaurantSchema);
