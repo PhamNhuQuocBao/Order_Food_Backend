@@ -1,15 +1,20 @@
-# order_food_be
+# Phạm Như Quốc Bảo - Backend
+## Hướng dẫn sử dụng
+### Cài đặt môi trường
+```
+1. Cài đặt Nodejs
+2. Cài đặt bun
+```
 
-To install dependencies:
-
+### Cài đặt dự án
+Chạy các lệnh bên dưới:
 ```bash
+git clone https://github.com/PhamNhuQuocBao/Order_Food_Backend
+cd Order_Food_Backend
 bun install
 ```
 
-To run:
-
+thay đổi tên file .env.example thành .env, sau đó chạy tiếp lệnh sau:
 ```bash
-bun run index.ts
+bun run dev
 ```
-
-This project was created using `bun init` in bun v1.0.0. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
