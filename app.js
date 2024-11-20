@@ -6,6 +6,7 @@ import cors from "cors";
 import { Restaurant } from "./models/retaurant.model.js";
 import { User } from "./models/user.model.js";
 import { Menu } from "./models/menu.model.js";
+import { Cart } from "./models/cart.model.js";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -47,6 +48,29 @@ app.post("/login", async (req, res) => {
   }
 });
 
+app.post("/register", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const hasUser = await User.findOne({ email });
+
+    if (hasUser) {
+      res.status(400).json({ message: "user was exist" });
+      return;
+    }
+
+    const userModel = new User(req.body);
+    const user = await userModel.save();
+
+    if (user) {
+      res.status(200).json(user);
+      return;
+    }
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 // =====================RESTAURANT========================
 app.get("/restaurants", async (req, res) => {
   try {
@@ -62,12 +86,6 @@ app.get("/restaurants-owner/:id", async (req, res) => {
   try {
     const id = req.params.id;
     const restaurant = await Restaurant.find({ ownerId: id });
-
-    if (restaurant.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No restaurants found for the given ownerId." });
-    }
 
     res.status(200).json(restaurant);
   } catch (error) {
@@ -180,6 +198,67 @@ app.delete("/menus/:id", async (req, res) => {
     const menu = await Menu.findByIdAndDelete(id);
 
     res.status(200).json(menu);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// =====================CART========================
+app.get("/cart/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const menu = await Cart.findOne({ userId: id });
+
+    res.status(200).json(menu);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.post("/cart/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { menuItem, quantity, totalPrice } = req.body.products[0];
+    const idItem = req.body.products[0].menuItem._id;
+    const cart = await Cart.findOne({ userId: id });
+
+    if (cart) {
+      // Check if the product already exists in the cart
+      const productIndex = cart.products.findIndex(
+        (product) => product.menuItem._id === idItem
+      );
+
+      if (productIndex >= 0) {
+        // If the product exists, update its quantity and totalPrice
+        cart.products[productIndex].quantity += quantity;
+        cart.products[productIndex].totalPrice += totalPrice;
+      } else {
+        // If the product does not exist, add it as a new entry
+        cart.products.push({
+          menuItem,
+          quantity,
+          totalPrice: menuItem.price * quantity,
+        });
+      }
+    } else {
+      // If the cart does not exist, create a new one
+      const cartModel = new Cart({
+        userId,
+        products: [
+          {
+            menuItem,
+            quantity,
+            totalPrice: menuItem.price * quantity,
+          },
+        ],
+      });
+      await cartModel.save();
+      return res.status(200).json(cartModel);
+    }
+
+    // Save the updated cart
+    await cart.save();
+    res.status(200).json(cart);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

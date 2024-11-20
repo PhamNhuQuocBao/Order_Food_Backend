@@ -9,13 +9,16 @@ const menuSchema = new mongoose.Schema({
     required: true,
     type: String,
   },
-  amount: {
-    required: true,
-    type: Number,
-  },
   price: {
     required: true,
     type: Number,
+  },
+  size: {
+    type: Array,
+  },
+  image: {
+    required: true,
+    type: String,
   },
   category: {
     required: true,
