@@ -7,12 +7,14 @@ import { Restaurant } from "./models/retaurant.model.js";
 import { User } from "./models/user.model.js";
 import { Menu } from "./models/menu.model.js";
 import { Cart } from "./models/cart.model.js";
+import Stripe from "stripe";
 
 // Load environment variables from .env file
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
+const stripe = Stripe(process.env.SECRET_KEY_STRIPE); // Replace w
 
 // Middleware to parse incoming JSON requests
 app.use(express.json());
@@ -261,6 +263,32 @@ app.post("/cart/:id", async (req, res) => {
     res.status(200).json(cart);
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+});
+
+// =====================CHECKOUT========================
+app.post("/create-payment-intent", async (req, res) => {
+  const { amount, currency } = req.body;
+
+  try {
+    // Create a PaymentIntent with the specified amount and currency
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount,
+      currency, // e.g., 'usd'
+      automatic_payment_methods: {
+        enabled: true,
+      },
+    });
+
+    // Send the clientSecret to the front-end
+    res.status(200).send({
+      clientSecret: paymentIntent.client_secret,
+    });
+  } catch (error) {
+    console.error("Error creating payment intent:", error);
+    res.status(500).send({
+      error: error.message,
+    });
   }
 });
 
