@@ -73,6 +73,56 @@ app.post("/register", async (req, res) => {
   }
 });
 
+app.put("/profile", async (req, res) => {
+  const { userId, name, phone, address, avatar } = req.body;
+  console.log(userId, name, phone, address, avatar);
+
+  if (!userId) {
+    return res.status(400).json({ error: "User ID is required" });
+  }
+
+  try {
+    // Find the user by ID and update their profile
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { name, phone, avatar }, // Fields to update
+      { new: true } // Returns the updated document
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res
+      .status(201)
+      .json({ message: "Profile updated successfully", user: updatedUser });
+  } catch (error) {
+    console.log("Error updating profile:", error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.get("/profile/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+
+    const profile = await User.findById(id);
+
+    if (!profile) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json(profile);
+  } catch (error) {
+    console.log("Error getting profile:", error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
 // =====================RESTAURANT========================
 app.get("/restaurants", async (req, res) => {
   try {
@@ -278,7 +328,7 @@ app.post("/create-payment-intent", async (req, res) => {
       { apiVersion: "2024-06-20" }
     );
     const paymentIntent = await stripe.paymentIntents.create({
-      amount,
+      amount: amount * 100,
       currency,
       customer: customer.id,
       // In the latest version of the API, specifying the `automatic_payment_methods` parameter
