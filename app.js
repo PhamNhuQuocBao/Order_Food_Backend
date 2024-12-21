@@ -271,18 +271,27 @@ app.post("/create-payment-intent", async (req, res) => {
   const { amount, currency } = req.body;
 
   try {
-    // Create a PaymentIntent with the specified amount and currency
+    // Use an existing Customer ID if this is a returning customer.
+    const customer = await stripe.customers.create();
+    const ephemeralKey = await stripe.ephemeralKeys.create(
+      { customer: customer.id },
+      { apiVersion: "2024-06-20" }
+    );
     const paymentIntent = await stripe.paymentIntents.create({
       amount,
-      currency, // e.g., 'usd'
+      currency,
+      customer: customer.id,
+      // In the latest version of the API, specifying the `automatic_payment_methods` parameter
+      // is optional because Stripe enables its functionality by default.
       automatic_payment_methods: {
         enabled: true,
       },
     });
 
-    // Send the clientSecret to the front-end
-    res.status(200).send({
-      clientSecret: paymentIntent.client_secret,
+    res.json({
+      paymentIntent: paymentIntent.client_secret,
+      ephemeralKey: ephemeralKey.secret,
+      customer: customer.id,
     });
   } catch (error) {
     console.error("Error creating payment intent:", error);
