@@ -270,7 +270,7 @@ app.get("/cart/:id", async (req, res) => {
 
 app.post("/cart/:id", async (req, res) => {
   try {
-    const id = req.params.id;
+    const { id } = req.params;
     const { menuItem, quantity, totalPrice } = req.body.products[0];
     const idItem = req.body.products[0].menuItem._id;
     const cart = await Cart.findOne({ userId: id });
@@ -296,7 +296,7 @@ app.post("/cart/:id", async (req, res) => {
     } else {
       // If the cart does not exist, create a new one
       const cartModel = new Cart({
-        userId,
+        userId: id,
         products: [
           {
             menuItem,
@@ -314,6 +314,7 @@ app.post("/cart/:id", async (req, res) => {
     res.status(200).json(cart);
   } catch (error) {
     res.status(400).json({ error: error.message });
+    console.log(error);
   }
 });
 
@@ -366,12 +367,28 @@ app.post("/create-payment-intent", async (req, res) => {
 });
 
 app.post("/order", async (req, res) => {
-  console.log("ORDERS: ", req.body);
+  const { userId } = req.body;
 
   try {
-    const orderModel = new Order({ ...req.body, status: "In progress" });
+    const orderModel = new Order({ ...req.body, status: "In Progress" });
     const order = await orderModel.save();
+
+    await Cart.findOneAndDelete({ userId });
+
     return res.status(200).json(order);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.get("/order/:id", async (req, res) => {
+  const { id } = req.params;
+  if (!id) {
+    return res.status(400).json({ error: "User ID is required" });
+  }
+  try {
+    const orders = await Order.find({ userId: id });
+    res.status(200).json(orders);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
