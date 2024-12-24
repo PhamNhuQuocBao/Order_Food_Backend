@@ -8,6 +8,7 @@ import { User } from "./models/user.model.js";
 import { Menu } from "./models/menu.model.js";
 import { Cart } from "./models/cart.model.js";
 import Stripe from "stripe";
+import { Order } from "./models/order.model.js";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -85,7 +86,7 @@ app.put("/profile", async (req, res) => {
     // Find the user by ID and update their profile
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { name, phone, avatar }, // Fields to update
+      { name, phone, avatar, address }, // Fields to update
       { new: true } // Returns the updated document
     );
 
@@ -316,6 +317,19 @@ app.post("/cart/:id", async (req, res) => {
   }
 });
 
+app.put("/cart/:id", async (req, res) => {
+  const { id } = req.params;
+  const { products } = req.body;
+  try {
+    const cart = await Cart.findOne({ userId: id });
+    cart.products = products;
+    await cart.save();
+    res.status(200).json(cart);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 // =====================CHECKOUT========================
 app.post("/create-payment-intent", async (req, res) => {
   const { amount, currency } = req.body;
@@ -351,6 +365,17 @@ app.post("/create-payment-intent", async (req, res) => {
   }
 });
 
+app.post("/order", async (req, res) => {
+  console.log("ORDERS: ", req.body);
+
+  try {
+    const orderModel = new Order({ ...req.body, status: "In progress" });
+    const order = await orderModel.save();
+    return res.status(200).json(order);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
