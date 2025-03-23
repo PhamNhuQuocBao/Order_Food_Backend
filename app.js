@@ -15,7 +15,7 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
-const stripe = Stripe(process.env.SECRET_KEY_STRIPE); // Replace w
+const stripe = Stripe(sk_test_51PgdLoGXQ1iVSXMTpO8MySdC02fcx1Ts3GJh9xFUhGTBEVCLeaCK6kKqtTTpnnEwlUrnx3XlaH1zmKJlFU6enZDk00GL9ASQrg); // Replace w
 
 // Middleware to parse incoming JSON requests
 app.use(express.json());
