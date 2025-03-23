@@ -7,7 +7,7 @@ import { Restaurant } from "./models/retaurant.model.js";
 import { User } from "./models/user.model.js";
 import { Menu } from "./models/menu.model.js";
 import { Cart } from "./models/cart.model.js";
-import Stripe from "stripe";
+// import Stripe from "stripe";
 import { Order } from "./models/order.model.js";
 
 // Load environment variables from .env file
@@ -15,7 +15,7 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
-const stripe = Stripe(sk_test_51PgdLoGXQ1iVSXMTpO8MySdC02fcx1Ts3GJh9xFUhGTBEVCLeaCK6kKqtTTpnnEwlUrnx3XlaH1zmKJlFU6enZDk00GL9ASQrg); // Replace w
+// const stripe = Stripe(sk_test_51PgdLoGXQ1iVSXMTpO8MySdC02fcx1Ts3GJh9xFUhGTBEVCLeaCK6kKqtTTpnnEwlUrnx3XlaH1zmKJlFU6enZDk00GL9ASQrg); // Replace w
 
 // Middleware to parse incoming JSON requests
 app.use(express.json());
@@ -332,39 +332,39 @@ app.put("/cart/:id", async (req, res) => {
 });
 
 // =====================CHECKOUT========================
-app.post("/create-payment-intent", async (req, res) => {
-  const { amount, currency } = req.body;
+// app.post("/create-payment-intent", async (req, res) => {
+//   const { amount, currency } = req.body;
 
-  try {
-    // Use an existing Customer ID if this is a returning customer.
-    const customer = await stripe.customers.create();
-    const ephemeralKey = await stripe.ephemeralKeys.create(
-      { customer: customer.id },
-      { apiVersion: "2024-06-20" }
-    );
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: amount * 100,
-      currency,
-      customer: customer.id,
-      // In the latest version of the API, specifying the `automatic_payment_methods` parameter
-      // is optional because Stripe enables its functionality by default.
-      automatic_payment_methods: {
-        enabled: true,
-      },
-    });
+//   try {
+//     // Use an existing Customer ID if this is a returning customer.
+//     const customer = await stripe.customers.create();
+//     const ephemeralKey = await stripe.ephemeralKeys.create(
+//       { customer: customer.id },
+//       { apiVersion: "2024-06-20" }
+//     );
+//     const paymentIntent = await stripe.paymentIntents.create({
+//       amount: amount * 100,
+//       currency,
+//       customer: customer.id,
+//       // In the latest version of the API, specifying the `automatic_payment_methods` parameter
+//       // is optional because Stripe enables its functionality by default.
+//       automatic_payment_methods: {
+//         enabled: true,
+//       },
+//     });
 
-    res.json({
-      paymentIntent: paymentIntent.client_secret,
-      ephemeralKey: ephemeralKey.secret,
-      customer: customer.id,
-    });
-  } catch (error) {
-    console.error("Error creating payment intent:", error);
-    res.status(500).send({
-      error: error.message,
-    });
-  }
-});
+//     res.json({
+//       paymentIntent: paymentIntent.client_secret,
+//       ephemeralKey: ephemeralKey.secret,
+//       customer: customer.id,
+//     });
+//   } catch (error) {
+//     console.error("Error creating payment intent:", error);
+//     res.status(500).send({
+//       error: error.message,
+//     });
+//   }
+// });
 
 app.post("/order", async (req, res) => {
   const { userId } = req.body;
