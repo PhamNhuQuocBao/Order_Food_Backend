@@ -3,7 +3,8 @@
   "module": "app.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "build": "echo 'No build step required'"
   },
   "devDependencies": {
     "bun-types": "latest"
